@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyparser = require('body-parser')
+const Joi = require('joi');
+
 const app = express();
 
 app.use(bodyparser.json());
@@ -33,17 +35,31 @@ app.get('/api/studentdata/:studentId', (req,res)=>{
       }
    
   })
-  
+  const postStudentSchema = Joi.object({
+    name: Joi.string().min(5).max(30).required(),
+    id: Joi.number().integer().min(1),
+    lang: Joi.string().min(5).max(10).required(),
+    std: Joi.number().integer().min(1),
+
+  })
 
 
 app.post('/api/studentdata', (req,res)=>{
     const student=req.body;
-    students.push(student)
-    return res.status(201).send({
-        msg:"success student has been created"
-    })
-})
+    const {error} = postStudentSchema.validate(student)
+    if (error){
+        return res.status(400).send({
+            msg:error.message
+        })  
+    }
+    
+      students.push(student)
+      return res.status(201).send({
+        msg:"student created successfully"
+      })
+    }
 
+)
 app.delete('/api/studentdata/:studentId', (req,res)=>{
     const {studentId} =req.params;
     const studentIndex =students.findIndex(students => students.id === studentId);
